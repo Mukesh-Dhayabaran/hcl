@@ -10,5 +10,29 @@ public class MonthlyUsageAnalyser {
 
         for (int i=0;i<monthlyUsage.length;i++) 
         System.out.println("Month "+(i+1)+": "+monthlyUsage[i]);
+
+        int total=0;
+        int max=monthlyUsage[0];
+        int min=monthlyUsage[0];
+
+        for (int usage : monthlyUsage) 
+        {
+            total+=usage;
+
+            if (usage>max)
+            max=usage;
+        
+            if (usage<min) 
+            min=usage;
+        }
+
+        double average = (double)total/monthlyUsage.length;
+
+        System.out.println();
+        System.out.println("Total Usage   : "+total);
+        System.out.println("Average Usage : "+average);
+        System.out.println("Maximum Usage : "+max);
+        System.out.println("Minimum Usage : "+min);
+        
     }
 }
