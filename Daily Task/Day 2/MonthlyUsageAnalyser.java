@@ -11,7 +11,7 @@ public class MonthlyUsageAnalyser {
         for (int i=0;i<monthlyUsage.length;i++) 
         System.out.println("Month "+(i+1)+": "+monthlyUsage[i]);
 
-        int total=0;
+        long total=0;
         int max=monthlyUsage[0];
         int min=monthlyUsage[0];
 
@@ -39,5 +39,27 @@ public class MonthlyUsageAnalyser {
             : Constants.GRADE_C;
 
         System.out.println("Usage Grade : "+grade);
+
+        int[][] houseUsage = {
+            {120, 150, 180, 200},
+            {100, 140, 160, 190},
+            {130, 170, 210, 220}
+        };
+
+        System.out.println();
+        System.out.println("-----------");
+        System.out.println("House Usage");
+        System.out.println("-----------");
+
+        for (int house=0;house<houseUsage.length;house++) 
+        {
+        
+            System.out.print("House "+(house+1)+": ");
+
+            for (int month=0;month<houseUsage[house].length;month++)
+            System.out.print(houseUsage[house][month]+" ");
+
+            System.out.println();
+        }
     }
 }
