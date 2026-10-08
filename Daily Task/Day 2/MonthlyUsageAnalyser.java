@@ -30,9 +30,14 @@ public class MonthlyUsageAnalyser {
 
         System.out.println();
         System.out.println("Total Usage   : "+total);
-        System.out.println("Average Usage : "+average);
+        System.out.printf("Average Usage : %.2f\n",average);
         System.out.println("Maximum Usage : "+max);
         System.out.println("Minimum Usage : "+min);
-        
+
+        char grade = average >= Constants.MEDIUM_USAGE_LIMIT ? Constants.GRADE_A 
+            : average >= Constants.LOW_USAGE_LIMIT ? Constants.GRADE_B
+            : Constants.GRADE_C;
+
+        System.out.println("Usage Grade : "+grade);
     }
 }
