@@ -1,0 +1,8 @@
+# Compiled Java files
+*.class
+
+# IDE files
+.vscode/
+
+# OS files
+Thumbs.db
