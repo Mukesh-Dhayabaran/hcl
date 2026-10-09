@@ -1,10 +1,15 @@
+import java.util.ArrayList;
 import java.util.Scanner;
+import model.Asset;
 
 public class AssetManagementMenu {
 
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
+        ArrayList<Asset> assets = new ArrayList<>();
+
+        int nextAssetId = 1;
         int choice = 0;
 
         do {
@@ -30,40 +35,114 @@ public class AssetManagementMenu {
             }
 
             switch (choice) {
-                case 1:
-                    System.out.println("Selected: Register an Asset (FR1)");
+
+                case 1: {
+                    System.out.println("\n--- Register an Asset ---");
+
+                    System.out.print("Enter asset tag: ");
+                    String assetTag = scanner.nextLine().trim();
+
+                    System.out.print("Enter asset name: ");
+                    String assetName = scanner.nextLine().trim();
+
+                    System.out.print("Enter category: ");
+                    String category = scanner.nextLine().trim();
+
+                    if (assetTag.isEmpty()
+                            || assetName.isEmpty()
+                            || category.isEmpty()) {
+                        System.out.println(
+                                "Error: Asset tag, name, and category cannot be empty."
+                        );
+                        break;
+                    }
+
+                    boolean duplicateTag = false;
+
+                    for (Asset existingAsset : assets) {
+                        if (existingAsset.getAssetTag()
+                                .equalsIgnoreCase(assetTag)) {
+                            duplicateTag = true;
+                            break;
+                        }
+                    }
+
+                    if (duplicateTag) {
+                        System.out.println(
+                                "Error: An asset with this tag already exists."
+                        );
+                        break;
+                    }
+
+                    Asset asset = new Asset(
+                            nextAssetId,
+                            assetTag,
+                            assetName,
+                            category,
+                            "AVAILABLE"
+                    );
+
+                    assets.add(asset);
+                    nextAssetId++;
+
+                    System.out.println(
+                            "Asset registered successfully!"
+                    );
+                    System.out.println("Asset ID: " + asset.getAssetId());
+                    System.out.println("Asset Tag: " + asset.getAssetTag());
+                    System.out.println("Asset Name: " + asset.getAssetName());
+                    System.out.println("Category: " + asset.getCategory());
+                    System.out.println("Status: " + asset.getStatus());
+
                     break;
+                }
 
                 case 2:
-                    System.out.println("Selected: Request an Asset (FR2)");
+                    System.out.println(
+                            "Asset request feature is not implemented yet."
+                    );
                     break;
 
                 case 3:
-                    System.out.println("Selected: Assign / Return an Asset (FR3)");
+                    System.out.println(
+                            "Assignment / return feature is not implemented yet."
+                    );
                     break;
 
                 case 4:
-                    System.out.println("Selected: Check Duplicate Assignment (FR4)");
+                    System.out.println(
+                            "Duplicate assignment checking is not implemented yet."
+                    );
                     break;
 
                 case 5:
-                    System.out.println("Selected: Record Asset Maintenance (FR5)");
+                    System.out.println(
+                            "Maintenance feature is not implemented yet."
+                    );
                     break;
 
                 case 6:
-                    System.out.println("Selected: Track Software Licences (FR6)");
+                    System.out.println(
+                            "Software licence tracking is not implemented yet."
+                    );
                     break;
 
                 case 7:
-                    System.out.println("Selected: Check Warranty Expiry (FR7)");
+                    System.out.println(
+                            "Warranty expiry checking is not implemented yet."
+                    );
                     break;
 
                 case 8:
-                    System.out.println("Selected: View Depreciation Report (FR8)");
+                    System.out.println(
+                            "Depreciation reporting is not implemented yet."
+                    );
                     break;
 
                 case 0:
-                    System.out.println("Exiting IT Asset Management System. Goodbye!");
+                    System.out.println(
+                            "Exiting IT Asset Management System. Goodbye!"
+                    );
                     break;
 
                 default:
