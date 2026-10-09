@@ -2,7 +2,7 @@
 *.class
 
 # IDE files
-.vscode/
+.vscode/    
 .idea/
 *.iml
 
