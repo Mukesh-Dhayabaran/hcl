@@ -22,6 +22,7 @@ public class AssetManagementMenu {
             System.out.println("6. Track Software Licences");
             System.out.println("7. Check Warranty Expiry");
             System.out.println("8. View Depreciation Report");
+            System.out.println("9. View All Registered Assets");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
 
@@ -139,6 +140,24 @@ public class AssetManagementMenu {
                     );
                     break;
 
+                case 9:
+                    System.out.println("\n--- Registered Assets ---");
+
+                    if (assets.isEmpty()) {
+                        System.out.println("No assets have been registered yet.");
+                    } else {
+                        for (Asset asset : assets) {
+                            System.out.println("-------------------------");
+                            System.out.println("Asset ID: " + asset.getAssetId());
+                            System.out.println("Asset Tag: " + asset.getAssetTag());
+                            System.out.println("Asset Name: " + asset.getAssetName());
+                            System.out.println("Category: " + asset.getCategory());
+                            System.out.println("Status: " + asset.getStatus());
+                        }
+                        System.out.println("-------------------------");
+                    }
+                    break;
+
                 case 0:
                     System.out.println(
                             "Exiting IT Asset Management System. Goodbye!"
@@ -147,7 +166,7 @@ public class AssetManagementMenu {
 
                 default:
                     System.out.println(
-                            "Invalid choice! Please select an option from 0 to 8."
+                            "Invalid choice! Please select an option from 0 to 9."
                     );
             }
 
