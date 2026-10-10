@@ -20,7 +20,7 @@ public class ModelTest {
         System.out.println("Category: " + asset.getCategory());
         System.out.println("Status: " + asset.getStatus());
 
-        // Test 2: AssetCategory
+        // Test 2: model.AssetCategory
         AssetCategory category = new AssetCategory(
                 1, "Laptop", "Portable computers"
         );
@@ -30,13 +30,13 @@ public class ModelTest {
         System.out.println("Name: " + category.getCategoryName());
         System.out.println("Description: " + category.getDescription());
 
-        // Test 3: Assignment
+        // Test 3: model.Assignment
         Assignment assignment = new Assignment(
                 101, 1, 501, LocalDate.now(), null
         );
 
         System.out.println("\n=== ASSIGNMENT TEST ===");
-        System.out.println("Assignment ID: " + assignment.getAssignmentId());
+        System.out.println("model.Assignment ID: " + assignment.getAssignmentId());
         System.out.println("Asset ID: " + assignment.getAssetId());
         System.out.println("Employee ID: " + assignment.getEmployeeId());
         System.out.println("Assigned Date: " + assignment.getAssignmentDate());

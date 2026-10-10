@@ -1,6 +1,8 @@
-import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.ArrayList;
+import java.time.LocalDate;
 import model.Asset;
+import model.Assignment;
 
 public class AssetManagementMenu {
 
@@ -8,6 +10,9 @@ public class AssetManagementMenu {
 
         Scanner scanner = new Scanner(System.in);
         ArrayList<Asset> assets = new ArrayList<>();
+
+        ArrayList<Assignment> assignments = new ArrayList<>();
+        int nextAssignmentId = 1;
 
         int nextAssetId = 1;
         int choice = 0;
@@ -104,11 +109,141 @@ public class AssetManagementMenu {
                     );
                     break;
 
-                case 3:
-                    System.out.println(
-                            "Assignment / return feature is not implemented yet."
-                    );
+
+                case 3: {
+                    System.out.println("\n--- Asset Assignment / Return ---");
+                    System.out.println("1. Assign Asset");
+                    System.out.println("2. Return Asset");
+                    System.out.println("0. Back to Main Menu");
+                    System.out.print("Enter your choice: ");
+
+                    String actionInput = scanner.nextLine().trim();
+
+                    if (actionInput.equals("1")) {
+                        System.out.print("Enter Asset ID: ");
+                        String idInput = scanner.nextLine().trim();
+
+                        int assetId;
+
+                        try {
+                            assetId = Integer.parseInt(idInput);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid Asset ID. Enter a number.");
+                            break;
+                        }
+
+                        Asset selectedAsset = null;
+
+                        for (Asset asset : assets) {
+                            if (asset.getAssetId() == assetId) {
+                                selectedAsset = asset;
+                                break;
+                            }
+                        }
+
+                        if (selectedAsset == null) {
+                            System.out.println("Asset not found.");
+                            break;
+                        }
+
+                        if (!selectedAsset.getStatus().equals("AVAILABLE")) {
+                            System.out.println("Asset is not available for assignment.");
+                            break;
+                        }
+
+                        System.out.print("Enter Employee ID: ");
+                        String employeeInput = scanner.nextLine().trim();
+
+                        int employeeId;
+
+                        try {
+                            employeeId = Integer.parseInt(employeeInput);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid Employee ID. Enter a number.");
+                            break;
+                        }
+
+                        if (employeeId <= 0) {
+                            System.out.println("Employee ID must be greater than zero.");
+                            break;
+                        }
+
+                        Assignment assignment = new Assignment(
+                                nextAssignmentId,
+                                assetId,
+                                employeeId,
+                                LocalDate.now(),
+                                null
+                        );
+
+                        assignments.add(assignment);
+                        nextAssignmentId++;
+                        selectedAsset.setStatus("ASSIGNED");
+
+                        System.out.println("Asset assigned successfully!");
+                        System.out.println("Assignment ID: " + assignment.getAssignmentId());
+                        System.out.println("Asset: " + selectedAsset.getAssetName());
+                        System.out.println("Employee ID: " + employeeId);
+                        System.out.println("Assignment Date: " + assignment.getAssignmentDate());
+
+                    } else if (actionInput.equals("2")) {
+                        System.out.print("Enter Asset ID to return: ");
+                        String idInput = scanner.nextLine().trim();
+
+                        int assetId;
+
+                        try {
+                            assetId = Integer.parseInt(idInput);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid Asset ID. Enter a number.");
+                            break;
+                        }
+
+                        Asset selectedAsset = null;
+
+                        for (Asset asset : assets) {
+                            if (asset.getAssetId() == assetId) {
+                                selectedAsset = asset;
+                                break;
+                            }
+                        }
+
+                        if (selectedAsset == null) {
+                            System.out.println("Asset not found.");
+                            break;
+                        }
+
+                        Assignment activeAssignment = null;
+
+                        for (Assignment assignment : assignments) {
+                            if (assignment.getAssetId() == assetId
+                                    && assignment.getReturnDate() == null) {
+                                activeAssignment = assignment;
+                                break;
+                            }
+                        }
+
+                        if (activeAssignment == null) {
+                            System.out.println("This asset has no active assignment.");
+                            break;
+                        }
+
+                        activeAssignment.setReturnDate(LocalDate.now());
+                        selectedAsset.setStatus("AVAILABLE");
+
+                        System.out.println("Asset returned successfully!");
+                        System.out.println("Asset: " + selectedAsset.getAssetName());
+                        System.out.println("Return Date: " + activeAssignment.getReturnDate());
+
+                    } else if (actionInput.equals("0")) {
+                        System.out.println("Returning to main menu.");
+                    } else {
+                        System.out.println("Invalid choice. Select 0, 1, or 2.");
+                    }
+
                     break;
+                }
+
 
                 case 4:
                     System.out.println(
