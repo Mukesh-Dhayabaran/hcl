@@ -1,5 +1,7 @@
 import java.util.Scanner;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.time.LocalDate;
 import model.Asset;
 import model.Assignment;
@@ -7,6 +9,7 @@ import model.AssetRequest;
 import model.Maintenance;
 import model.SoftwareLicense;
 import model.Warranty;
+import model.DepreciationReport;
 
 public class AssetManagementMenu {
 
@@ -31,6 +34,8 @@ public class AssetManagementMenu {
 
         ArrayList<Warranty> warranties = new ArrayList<>();
         int nextWarrantyId = 1;
+
+        Map<Integer, DepreciationReport> depreciationDetails = new HashMap<>();
 
         int choice = 0;
 
@@ -822,11 +827,170 @@ public class AssetManagementMenu {
                 }
 
 
-                case 8:
-                    System.out.println(
-                            "Depreciation reporting is not implemented yet."
+
+
+
+                case 8: {
+                    if (assets.isEmpty()) {
+                        System.out.println("No assets registered yet.");
+                        break;
+                    }
+
+                    System.out.println("\n--- Registered Assets ---");
+                    for (Asset asset : assets) {
+                        System.out.println(
+                                "Asset ID: " + asset.getAssetId()
+                                        + " | " + asset.getAssetName()
+                                        + " | Tag: " + asset.getAssetTag()
+                        );
+                    }
+
+                    System.out.print("Enter Asset ID: ");
+                    String assetIdInput = scanner.nextLine().trim();
+
+                    int assetId;
+
+                    try {
+                        assetId = Integer.parseInt(assetIdInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Asset ID. Enter a number.");
+                        break;
+                    }
+
+                    Asset selectedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == assetId) {
+                            selectedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (selectedAsset == null) {
+                        System.out.println("Asset not found.");
+                        break;
+                    }
+
+                    DepreciationReport report = depreciationDetails.get(assetId);
+
+                    if (report == null) {
+                        double purchaseCost;
+                        double residualValue;
+                        int usefulLifeYears;
+                        int elapsedYears;
+
+                        System.out.print("Enter purchase cost: ");
+                        try {
+                            purchaseCost = Double.parseDouble(
+                                    scanner.nextLine().trim()
+                            );
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid purchase cost.");
+                            break;
+                        }
+
+                        if (!Double.isFinite(purchaseCost) || purchaseCost <= 0) {
+                            System.out.println("Purchase cost must be greater than zero.");
+                            break;
+                        }
+
+                        System.out.print("Enter residual value: ");
+                        try {
+                            residualValue = Double.parseDouble(
+                                    scanner.nextLine().trim()
+                            );
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid residual value.");
+                            break;
+                        }
+
+                        if (!Double.isFinite(residualValue)
+                                || residualValue < 0
+                                || residualValue > purchaseCost) {
+                            System.out.println(
+                                    "Residual value must be between zero and purchase cost."
+                            );
+                            break;
+                        }
+
+                        System.out.print("Enter useful life in years: ");
+                        try {
+                            usefulLifeYears = Integer.parseInt(
+                                    scanner.nextLine().trim()
+                            );
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid useful life.");
+                            break;
+                        }
+
+                        if (usefulLifeYears <= 0) {
+                            System.out.println("Useful life must be greater than zero.");
+                            break;
+                        }
+
+                        System.out.print("Enter elapsed years: ");
+                        try {
+                            elapsedYears = Integer.parseInt(
+                                    scanner.nextLine().trim()
+                            );
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid elapsed years.");
+                            break;
+                        }
+
+                        if (elapsedYears < 0) {
+                            System.out.println("Elapsed years cannot be negative.");
+                            break;
+                        }
+
+                        report = new DepreciationReport(
+                                assetId,
+                                purchaseCost,
+                                residualValue,
+                                usefulLifeYears,
+                                elapsedYears
+                        );
+
+                        depreciationDetails.put(assetId, report);
+                    }
+
+                    System.out.println("\n===== DEPRECIATION REPORT =====");
+                    System.out.println("Asset Name: " + selectedAsset.getAssetName());
+                    System.out.println("Asset Tag: " + selectedAsset.getAssetTag());
+                    System.out.println("Method: Straight-Line Method");
+
+                    System.out.printf(
+                            "Purchase Cost: %.2f%n",
+                            report.getPurchaseCost()
                     );
+                    System.out.printf(
+                            "Residual Value: %.2f%n",
+                            report.getResidualValue()
+                    );
+                    System.out.println(
+                            "Useful Life: " + report.getUsefulLifeYears() + " years"
+                    );
+                    System.out.println(
+                            "Elapsed Years: " + report.getElapsedYears()
+                    );
+
+                    System.out.printf(
+                            "Annual Depreciation: %.2f%n",
+                            report.getAnnualDepreciation()
+                    );
+                    System.out.printf(
+                            "Accumulated Depreciation: %.2f%n",
+                            report.getAccumulatedDepreciation()
+                    );
+                    System.out.printf(
+                            "Current Book Value: %.2f%n",
+                            report.getCurrentValue()
+                    );
+
                     break;
+                }
+
+
 
                 case 9:
                     System.out.println("\n--- Registered Assets ---");
