@@ -30,7 +30,7 @@ public class AssetManagementMenu {
             System.out.println("1. Register an Asset");
             System.out.println("2. Request an Asset");
             System.out.println("3. Assign / Return an Asset");
-            System.out.println("4. Check Duplicate Assignment");
+            System.out.println("4. Check Asset Assignment");
             System.out.println("5. Record Asset Maintenance");
             System.out.println("6. Track Software Licences");
             System.out.println("7. Check Warranty Expiry");
@@ -345,11 +345,73 @@ public class AssetManagementMenu {
                 }
 
 
-                case 4:
-                    System.out.println(
-                            "Duplicate assignment checking is not implemented yet."
-                    );
+
+
+                case 4: {
+                    System.out.println("\n--- Check Asset Assignment ---");
+
+                    System.out.print("Enter Asset ID: ");
+                    String assetIdInput = scanner.nextLine().trim();
+
+                    int assetId;
+
+                    try {
+                        assetId = Integer.parseInt(assetIdInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Asset ID. Enter a number.");
+                        break;
+                    }
+
+                    Asset selectedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == assetId) {
+                            selectedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (selectedAsset == null) {
+                        System.out.println("Asset not found.");
+                        break;
+                    }
+
+                    System.out.println("\n--- Asset Details ---");
+                    System.out.println("Asset ID: " + selectedAsset.getAssetId());
+                    System.out.println("Asset Tag: " + selectedAsset.getAssetTag());
+                    System.out.println("Asset Name: " + selectedAsset.getAssetName());
+                    System.out.println("Category: " + selectedAsset.getCategory());
+                    System.out.println("Current Status: " + selectedAsset.getStatus());
+
+                    Assignment activeAssignment = null;
+
+                    for (Assignment assignment : assignments) {
+                        if (assignment.getAssetId() == assetId
+                                && assignment.getReturnDate() == null) {
+                            activeAssignment = assignment;
+                            break;
+                        }
+                    }
+
+                    if (activeAssignment != null) {
+                        System.out.println("\n--- Current Assignment ---");
+                        System.out.println(
+                                "Assignment ID: " + activeAssignment.getAssignmentId()
+                        );
+                        System.out.println(
+                                "Employee ID: " + activeAssignment.getEmployeeId()
+                        );
+                        System.out.println(
+                                "Assignment Date: " + activeAssignment.getAssignmentDate()
+                        );
+                        System.out.println("Assignment Status: ACTIVE");
+                    } else {
+                        System.out.println("\nNo active assignment found for this asset.");
+                    }
+
                     break;
+                }
+
 
 
                 case 5: {
