@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import model.Asset;
 import model.Assignment;
 import model.AssetRequest;
+import model.Maintenance;
 
 public class AssetManagementMenu {
 
@@ -17,6 +18,9 @@ public class AssetManagementMenu {
 
         ArrayList<AssetRequest> assetRequests = new ArrayList<>();
         int nextRequestId = 1;
+
+        ArrayList<Maintenance> maintenanceRecords = new ArrayList<>();
+        int nextMaintenanceId = 1;
 
         int nextAssetId = 1;
         int choice = 0;
@@ -32,6 +36,7 @@ public class AssetManagementMenu {
             System.out.println("7. Check Warranty Expiry");
             System.out.println("8. View Depreciation Report");
             System.out.println("9. View All Registered Assets");
+            System.out.println("10. Complete Asset Maintenance");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
 
@@ -236,8 +241,13 @@ public class AssetManagementMenu {
                             break;
                         }
 
-                        if (!selectedAsset.getStatus().equals("AVAILABLE")) {
+                        if (selectedAsset.getStatus().equals("ASSIGNED")) {
                             System.out.println("Asset is not available for assignment.");
+                            break;
+                        }
+
+                        if (selectedAsset.getStatus().equals("MAINTENANCE")) {
+                            System.out.println("Asset is under maintenance.");
                             break;
                         }
 
@@ -341,11 +351,94 @@ public class AssetManagementMenu {
                     );
                     break;
 
-                case 5:
-                    System.out.println(
-                            "Maintenance feature is not implemented yet."
+
+                case 5: {
+                    System.out.println("\n--- Record Asset Maintenance ---");
+
+                    System.out.print("Enter Asset ID: ");
+                    String assetIdInput = scanner.nextLine().trim();
+
+                    int assetId;
+
+                    try {
+                        assetId = Integer.parseInt(assetIdInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Asset ID. Enter a number.");
+                        break;
+                    }
+
+                    Asset selectedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == assetId) {
+                            selectedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (selectedAsset == null) {
+                        System.out.println("Asset not found.");
+                        break;
+                    }
+
+                    if ("DISPOSED".equals(selectedAsset.getStatus())) {
+                        System.out.println("Disposed assets cannot undergo maintenance.");
+                        break;
+                    }
+
+                    if ("MAINTENANCE".equals(selectedAsset.getStatus())) {
+                        System.out.println("This asset is already under maintenance.");
+                        break;
+                    }
+
+                    if ("ASSIGNED".equals(selectedAsset.getStatus())) {
+                        System.out.println(
+                                "Return the asset before recording maintenance."
+                        );
+                        break;
+                    }
+
+                    System.out.print("Enter maintenance description: ");
+                    String description = scanner.nextLine().trim();
+
+                    if (description.isEmpty()) {
+                        System.out.println("Description cannot be empty.");
+                        break;
+                    }
+
+                    Maintenance maintenance = new Maintenance(
+                            nextMaintenanceId,
+                            assetId,
+                            description,
+                            LocalDate.now(),
+                            "IN_PROGRESS"
                     );
+
+                    maintenanceRecords.add(maintenance);
+                    nextMaintenanceId++;
+
+                    selectedAsset.setStatus("MAINTENANCE");
+
+                    System.out.println("Maintenance recorded successfully!");
+                    System.out.println(
+                            "Maintenance ID: " + maintenance.getMaintenanceId()
+                    );
+                    System.out.println(
+                            "Asset: " + selectedAsset.getAssetName()
+                    );
+                    System.out.println(
+                            "Description: " + maintenance.getDescription()
+                    );
+                    System.out.println(
+                            "Maintenance Date: " + maintenance.getMaintenanceDate()
+                    );
+                    System.out.println(
+                            "Maintenance Status: " + maintenance.getStatus()
+                    );
+
                     break;
+                }
+
 
                 case 6:
                     System.out.println(
@@ -382,6 +475,113 @@ public class AssetManagementMenu {
                         System.out.println("-------------------------");
                     }
                     break;
+
+
+                case 10: {
+                    System.out.println("\n--- Complete Asset Maintenance ---");
+
+                    boolean foundMaintenance = false;
+
+                    for (Maintenance record : maintenanceRecords) {
+                        if ("IN_PROGRESS".equals(record.getStatus())) {
+                            Asset asset = null;
+
+                            for (Asset item : assets) {
+                                if (item.getAssetId() == record.getAssetId()) {
+                                    asset = item;
+                                    break;
+                                }
+                            }
+
+                            if (asset != null) {
+                                System.out.println(
+                                        "Maintenance ID: " + record.getMaintenanceId()
+                                );
+                                System.out.println(
+                                        "Asset ID: " + asset.getAssetId()
+                                );
+                                System.out.println(
+                                        "Asset Name: " + asset.getAssetName()
+                                );
+                                System.out.println(
+                                        "Description: " + record.getDescription()
+                                );
+                                System.out.println();
+                                foundMaintenance = true;
+                            }
+                        }
+                    }
+
+                    if (!foundMaintenance) {
+                        System.out.println("No pending maintenance records found.");
+                        break;
+                    }
+
+                    System.out.print("Enter Maintenance ID to complete: ");
+                    String maintenanceInput  = scanner.nextLine().trim();
+
+                    int maintenanceId;
+
+                    try {
+                        maintenanceId = Integer.parseInt(maintenanceInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Maintenance ID. Enter a number.");
+                        break;
+                    }
+
+                    Maintenance selectedRecord = null;
+
+                    for (Maintenance record : maintenanceRecords) {
+
+                        if (record.getMaintenanceId() == maintenanceId) {
+                            selectedRecord = record;
+                            break;
+                        }
+                    }
+
+                    if (selectedRecord == null) {
+                        System.out.println("Maintenance record not found.");
+                        break;
+                    }
+
+                    if (!"IN_PROGRESS".equals(selectedRecord.getStatus())) {
+                        System.out.println("This maintenance is already completed.");
+                        break;
+                    }
+
+                    Asset selectedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == selectedRecord.getAssetId()) {
+                            selectedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (selectedAsset == null) {
+                        System.out.println("Associated asset not found.");
+                        break;
+                    }
+
+                    if (!"MAINTENANCE".equals(selectedAsset.getStatus())) {
+                        System.out.println(
+                                "Asset status is inconsistent. Maintenance cannot be completed."
+                        );
+                        break;
+                    }
+
+                    selectedRecord.setStatus("COMPLETED");
+                    selectedAsset.setStatus("AVAILABLE");
+
+                    System.out.println("Maintenance completed successfully!");
+                    System.out.println("Maintenance ID: " + selectedRecord.getMaintenanceId());
+                    System.out.println("Asset: " + selectedAsset.getAssetName());
+                    System.out.println("Maintenance Status: " + selectedRecord.getStatus());
+                    System.out.println("Asset Status: " + selectedAsset.getStatus());
+
+                    break;
+                }
+
 
                 case 0:
                     System.out.println(
