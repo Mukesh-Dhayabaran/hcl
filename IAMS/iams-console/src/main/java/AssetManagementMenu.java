@@ -3,6 +3,7 @@ import java.util.ArrayList;
 import java.time.LocalDate;
 import model.Asset;
 import model.Assignment;
+import model.AssetRequest;
 
 public class AssetManagementMenu {
 
@@ -13,6 +14,9 @@ public class AssetManagementMenu {
 
         ArrayList<Assignment> assignments = new ArrayList<>();
         int nextAssignmentId = 1;
+
+        ArrayList<AssetRequest> assetRequests = new ArrayList<>();
+        int nextRequestId = 1;
 
         int nextAssetId = 1;
         int choice = 0;
@@ -103,11 +107,97 @@ public class AssetManagementMenu {
                     break;
                 }
 
-                case 2:
-                    System.out.println(
-                            "Asset request feature is not implemented yet."
+                case 2: {
+                    System.out.println("\n--- Request an Asset ---");
+
+                    boolean availableAssetFound = false;
+
+                    for (Asset asset : assets) {
+                        if ("AVAILABLE".equals(asset.getStatus())) {
+                            System.out.println(
+                                    "Asset ID: " + asset.getAssetId()
+                                            + " | Tag: " + asset.getAssetTag()
+                                            + " | Name: " + asset.getAssetName()
+                                            + " | Category: " + asset.getCategory()
+                            );
+                            availableAssetFound = true;
+                        }
+                    }
+
+                    if (!availableAssetFound) {
+                        System.out.println("No assets are currently available.");
+                        break;
+                    }
+
+                    System.out.print("Enter Asset ID to request: ");
+                    String assetIdInput = scanner.nextLine().trim();
+
+                    int requestedAssetId;
+
+                    try {
+                        requestedAssetId = Integer.parseInt(assetIdInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Asset ID. Enter a number.");
+                        break;
+                    }
+
+                    Asset requestedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == requestedAssetId) {
+                            requestedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (requestedAsset == null) {
+                        System.out.println("Asset not found.");
+                        break;
+                    }
+
+                    if (!"AVAILABLE".equals(requestedAsset.getStatus())) {
+                        System.out.println("This asset is not available for requests.");
+                        break;
+                    }
+
+                    System.out.print("Enter Employee ID: ");
+                    String employeeIdInput = scanner.nextLine().trim();
+
+                    int employeeId;
+
+                    try {
+                        employeeId = Integer.parseInt(employeeIdInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Employee ID. Enter a number.");
+                        break;
+                    }
+
+                    if (employeeId <= 0) {
+                        System.out.println("Employee ID must be greater than zero.");
+                        break;
+                    }
+
+                    AssetRequest request = new AssetRequest(
+                            nextRequestId,
+                            requestedAssetId,
+                            employeeId,
+                            LocalDate.now(),
+                            "PENDING"
                     );
+
+                    assetRequests.add(request);
+                    nextRequestId++;
+
+                    System.out.println("Asset request submitted successfully!");
+                    System.out.println("Request ID: " + request.getRequestId());
+                    System.out.println("Asset: " + requestedAsset.getAssetName());
+                    System.out.println("Employee ID: " + request.getEmployeeId());
+                    System.out.println("Request Date: " + request.getRequestDate());
+                    System.out.println("Request Status: " + request.getStatus());
+
                     break;
+                }
+
 
 
                 case 3: {
