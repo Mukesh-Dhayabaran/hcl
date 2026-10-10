@@ -5,6 +5,7 @@ import model.Asset;
 import model.Assignment;
 import model.AssetRequest;
 import model.Maintenance;
+import model.SoftwareLicense;
 
 public class AssetManagementMenu {
 
@@ -12,6 +13,8 @@ public class AssetManagementMenu {
 
         Scanner scanner = new Scanner(System.in);
         ArrayList<Asset> assets = new ArrayList<>();
+
+        int nextAssetId = 1;
 
         ArrayList<Assignment> assignments = new ArrayList<>();
         int nextAssignmentId = 1;
@@ -22,7 +25,9 @@ public class AssetManagementMenu {
         ArrayList<Maintenance> maintenanceRecords = new ArrayList<>();
         int nextMaintenanceId = 1;
 
-        int nextAssetId = 1;
+        ArrayList<SoftwareLicense> softwareLicenses = new ArrayList<>();
+        int nextLicenseId = 1;
+
         int choice = 0;
 
         do {
@@ -502,11 +507,152 @@ public class AssetManagementMenu {
                 }
 
 
-                case 6:
-                    System.out.println(
-                            "Software licence tracking is not implemented yet."
-                    );
+
+                case 6: {
+                    System.out.println("\n--- Track Software Licences ---");
+                    System.out.println("1. Add Software Licence");
+                    System.out.println("2. View Software Licences");
+                    System.out.println("3. Allocate Licence Seat");
+                    System.out.println("0. Back to Main Menu");
+                    System.out.print("Enter your choice: ");
+
+                    String choiceInput = scanner.nextLine().trim();
+                    int licenseChoice;
+
+                    try {
+                        licenseChoice = Integer.parseInt(choiceInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid choice. Enter a number.");
+                        break;
+                    }
+
+                    switch (licenseChoice) {
+                        case 1: {
+                            System.out.print("Enter software name: ");
+                            String softwareName = scanner.nextLine().trim();
+
+                            if (softwareName.isEmpty()) {
+                                System.out.println("Software name cannot be empty.");
+                                break;
+                            }
+
+                            System.out.print("Enter purchased seats: ");
+                            String seatsInput = scanner.nextLine().trim();
+
+                            int purchasedSeats;
+
+                            try {
+                                purchasedSeats = Integer.parseInt(seatsInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid seat count. Enter a number.");
+                                break;
+                            }
+
+                            if (purchasedSeats <= 0) {
+                                System.out.println("Purchased seats must be greater than zero.");
+                                break;
+                            }
+
+                            SoftwareLicense license = new SoftwareLicense(
+                                    nextLicenseId, softwareName, purchasedSeats
+                            );
+
+                            softwareLicenses.add(license);
+                            System.out.println("Software licence added successfully.");
+                            System.out.println("Licence ID: " + nextLicenseId);
+                            nextLicenseId++;
+                            break;
+                        }
+
+                        case 2: {
+                            if (softwareLicenses.isEmpty()) {
+                                System.out.println("No software licences registered.");
+                                break;
+                            }
+
+                            System.out.println("\n--- Registered Software Licences ---");
+
+                            for (SoftwareLicense license : softwareLicenses) {
+                                System.out.println("Licence ID: " + license.getLicenseId());
+                                System.out.println("Software: " + license.getSoftwareName());
+                                System.out.println("Purchased Seats: "
+                                        + license.getPurchasedSeats());
+                                System.out.println("Used Seats: " + license.getUsedSeats());
+                                System.out.println("Available Seats: "
+                                        + license.getAvailableSeats());
+                                System.out.println("-----------------------------");
+                            }
+                            break;
+                        }
+
+                        case 3: {
+                            if (softwareLicenses.isEmpty()) {
+                                System.out.println("No software licences registered.");
+                                break;
+                            }
+
+                            System.out.println("\n--- Available Software Licences ---");
+
+                            for (SoftwareLicense license : softwareLicenses) {
+                                System.out.println(
+                                        license.getLicenseId() + ". "
+                                                + license.getSoftwareName()
+                                                + " (Available: "
+                                                + license.getAvailableSeats() + ")"
+                                );
+                            }
+
+                            System.out.print("Enter Licence ID: ");
+                            String idInput = scanner.nextLine().trim();
+
+                            int licenseId;
+
+                            try {
+                                licenseId = Integer.parseInt(idInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid Licence ID. Enter a number.");
+                                break;
+                            }
+
+                            SoftwareLicense selectedLicense = null;
+
+                            for (SoftwareLicense license : softwareLicenses) {
+                                if (license.getLicenseId() == licenseId) {
+                                    selectedLicense = license;
+                                    break;
+                                }
+                            }
+
+                            if (selectedLicense == null) {
+                                System.out.println("Software licence not found.");
+                                break;
+                            }
+
+                            if (selectedLicense.allocateSeat()) {
+                                System.out.println("Licence seat allocated successfully.");
+                                System.out.println("Software: "
+                                        + selectedLicense.getSoftwareName());
+                                System.out.println("Available Seats: "
+                                        + selectedLicense.getAvailableSeats());
+                            } else {
+                                System.out.println(
+                                        "Allocation denied. No available licence seats."
+                                );
+                            }
+                            break;
+                        }
+
+                        case 0:
+                            System.out.println("Returning to main menu.");
+                            break;
+
+                        default:
+                            System.out.println("Invalid choice.");
+                    }
+
                     break;
+                }
+
 
                 case 7:
                     System.out.println(
