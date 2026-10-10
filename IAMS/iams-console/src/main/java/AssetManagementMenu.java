@@ -6,6 +6,7 @@ import model.Assignment;
 import model.AssetRequest;
 import model.Maintenance;
 import model.SoftwareLicense;
+import model.Warranty;
 
 public class AssetManagementMenu {
 
@@ -27,6 +28,9 @@ public class AssetManagementMenu {
 
         ArrayList<SoftwareLicense> softwareLicenses = new ArrayList<>();
         int nextLicenseId = 1;
+
+        ArrayList<Warranty> warranties = new ArrayList<>();
+        int nextWarrantyId = 1;
 
         int choice = 0;
 
@@ -654,11 +658,169 @@ public class AssetManagementMenu {
                 }
 
 
-                case 7:
-                    System.out.println(
-                            "Warranty expiry checking is not implemented yet."
-                    );
+
+                case 7: {
+                    System.out.println("\n--- Warranty Expiry Alerts ---");
+                    System.out.println("1. Register Asset Warranty");
+                    System.out.println("2. View Warranty Expiry Alerts");
+                    System.out.println("0. Back to Main Menu");
+                    System.out.print("Enter your choice: ");
+
+                    String choiceInput = scanner.nextLine().trim();
+                    int warrantyChoice;
+
+                    try {
+                        warrantyChoice = Integer.parseInt(choiceInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid choice. Enter a number.");
+                        break;
+                    }
+
+                    switch (warrantyChoice) {
+                        case 1: {
+                            if (assets.isEmpty()) {
+                                System.out.println("No assets registered yet.");
+                                break;
+                            }
+
+                            System.out.println("\n--- Registered Assets ---");
+                            for (Asset asset : assets) {
+                                System.out.println(
+                                        "Asset ID: " + asset.getAssetId()
+                                                + " | " + asset.getAssetName()
+                                                + " | Tag: " + asset.getAssetTag()
+                                );
+                            }
+
+                            System.out.print("Enter Asset ID: ");
+                            String assetIdInput = scanner.nextLine().trim();
+
+                            int assetId;
+
+                            try {
+                                assetId = Integer.parseInt(assetIdInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid Asset ID. Enter a number.");
+                                break;
+                            }
+
+                            Asset selectedAsset = null;
+
+                            for (Asset asset : assets) {
+                                if (asset.getAssetId() == assetId) {
+                                    selectedAsset = asset;
+                                    break;
+                                }
+                            }
+
+                            if (selectedAsset == null) {
+                                System.out.println("Asset not found.");
+                                break;
+                            }
+
+                            boolean warrantyExists = false;
+
+                            for (Warranty warranty : warranties) {
+                                if (warranty.getAssetId() == assetId) {
+                                    warrantyExists = true;
+                                    break;
+                                }
+                            }
+
+                            if (warrantyExists) {
+                                System.out.println(
+                                        "A warranty is already registered for this asset."
+                                );
+                                break;
+                            }
+
+                            System.out.print("Enter warranty expiry date (YYYY-MM-DD): ");
+                            String expiryInput = scanner.nextLine().trim();
+
+                            LocalDate expiryDate;
+
+                            try {
+                                expiryDate = LocalDate.parse(expiryInput);
+                            } catch (java.time.format.DateTimeParseException e) {
+                                System.out.println(
+                                        "Invalid date. Use the format YYYY-MM-DD."
+                                );
+                                break;
+                            }
+
+                            Warranty warranty = new Warranty(
+                                    nextWarrantyId, assetId, expiryDate
+                            );
+
+                            warranties.add(warranty);
+
+                            System.out.println("Warranty registered successfully.");
+                            System.out.println("Warranty ID: " + nextWarrantyId);
+                            System.out.println("Expiry Date: " + expiryDate);
+
+                            nextWarrantyId++;
+                            break;
+                        }
+
+                        case 2: {
+                            if (warranties.isEmpty()) {
+                                System.out.println("No warranties registered.");
+                                break;
+                            }
+
+                            System.out.println("\n--- Warranty Expiry Report ---");
+
+                            for (Warranty warranty : warranties) {
+                                Asset linkedAsset = null;
+
+                                for (Asset asset : assets) {
+                                    if (asset.getAssetId() == warranty.getAssetId()) {
+                                        linkedAsset = asset;
+                                        break;
+                                    }
+                                }
+
+                                if (linkedAsset == null) {
+                                    continue;
+                                }
+
+                                long daysRemaining = warranty.getDaysUntilExpiry();
+
+                                System.out.println("\nAsset: "
+                                        + linkedAsset.getAssetName());
+                                System.out.println("Asset ID: "
+                                        + warranty.getAssetId());
+                                System.out.println("Expiry Date: "
+                                        + warranty.getExpiryDate());
+
+                                if (warranty.isExpired()) {
+                                    System.out.println("Status: EXPIRED");
+                                    System.out.println("Expired "
+                                            + Math.abs(daysRemaining) + " day(s) ago");
+                                } else if (warranty.isExpiringSoon()) {
+                                    System.out.println("Status: EXPIRING SOON");
+                                    System.out.println("Days remaining: "
+                                            + daysRemaining);
+                                } else {
+                                    System.out.println("Status: ACTIVE");
+                                    System.out.println("Days remaining: "
+                                            + daysRemaining);
+                                }
+                            }
+                            break;
+                        }
+
+                        case 0:
+                            System.out.println("Returning to main menu.");
+                            break;
+
+                        default:
+                            System.out.println("Invalid choice.");
+                    }
+
                     break;
+                }
+
 
                 case 8:
                     System.out.println(
