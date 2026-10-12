@@ -10,6 +10,8 @@ import model.Maintenance;
 import model.SoftwareLicense;
 import model.Warranty;
 import model.DepreciationReport;
+import exception.ValidationException;
+import exception.DuplicateAssetException;
 
 public class AssetManagementMenu {
 
@@ -65,6 +67,7 @@ public class AssetManagementMenu {
 
             switch (choice) {
 
+
                 case 1: {
                     System.out.println("\n--- Register an Asset ---");
 
@@ -77,54 +80,50 @@ public class AssetManagementMenu {
                     System.out.print("Enter category: ");
                     String category = scanner.nextLine().trim();
 
-                    if (assetTag.isEmpty()
-                            || assetName.isEmpty()
-                            || category.isEmpty()) {
-                        System.out.println(
-                                "Error: Asset tag, name, and category cannot be empty."
-                        );
-                        break;
-                    }
-
-                    boolean duplicateTag = false;
-
-                    for (Asset existingAsset : assets) {
-                        if (existingAsset.getAssetTag()
-                                .equalsIgnoreCase(assetTag)) {
-                            duplicateTag = true;
-                            break;
+                    try {
+                        if (assetTag.isEmpty()
+                                || assetName.isEmpty()
+                                || category.isEmpty()) {
+                            throw new ValidationException(
+                                    "Asset tag, name, and category cannot be empty."
+                            );
                         }
-                    }
 
-                    if (duplicateTag) {
-                        System.out.println(
-                                "Error: An asset with this tag already exists."
+                        for (Asset existingAsset : assets) {
+                            if (existingAsset.getAssetTag()
+                                    .equalsIgnoreCase(assetTag)) {
+                                throw new DuplicateAssetException(
+                                        "An asset with this tag already exists: "
+                                                + assetTag
+                                );
+                            }
+                        }
+
+                        Asset asset = new Asset(
+                                nextAssetId,
+                                assetTag,
+                                assetName,
+                                category,
+                                "AVAILABLE"
                         );
-                        break;
+
+                        assets.add(asset);
+                        nextAssetId++;
+
+                        System.out.println("Asset registered successfully!");
+                        System.out.println("Asset ID: " + asset.getAssetId());
+                        System.out.println("Asset Tag: " + asset.getAssetTag());
+                        System.out.println("Asset Name: " + asset.getAssetName());
+                        System.out.println("Category: " + asset.getCategory());
+                        System.out.println("Status: " + asset.getStatus());
+
+                    } catch (ValidationException | DuplicateAssetException e) {
+                        System.out.println("Error: " + e.getMessage());
                     }
-
-                    Asset asset = new Asset(
-                            nextAssetId,
-                            assetTag,
-                            assetName,
-                            category,
-                            "AVAILABLE"
-                    );
-
-                    assets.add(asset);
-                    nextAssetId++;
-
-                    System.out.println(
-                            "Asset registered successfully!"
-                    );
-                    System.out.println("Asset ID: " + asset.getAssetId());
-                    System.out.println("Asset Tag: " + asset.getAssetTag());
-                    System.out.println("Asset Name: " + asset.getAssetName());
-                    System.out.println("Category: " + asset.getCategory());
-                    System.out.println("Status: " + asset.getStatus());
 
                     break;
                 }
+
 
                 case 2: {
                     System.out.println("\n--- Request an Asset ---");
