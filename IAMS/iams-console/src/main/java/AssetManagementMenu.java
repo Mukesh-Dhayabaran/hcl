@@ -1,7 +1,12 @@
 import java.util.Scanner;
+import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.time.LocalDate;
 import model.Asset;
 import model.Assignment;
@@ -18,23 +23,34 @@ public class AssetManagementMenu {
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        ArrayList<Asset> assets = new ArrayList<>();
+        List<Asset> assets = new ArrayList<>();
+
+        Set<String> assetTags = new HashSet<>();
 
         int nextAssetId = 1;
 
-        ArrayList<Assignment> assignments = new ArrayList<>();
+        List<Assignment> assignments = new ArrayList<>();
         int nextAssignmentId = 1;
 
-        ArrayList<AssetRequest> assetRequests = new ArrayList<>();
+
+        List<AssetRequest> assetRequests = new ArrayList<>();
+
+        // Maintains pending requests in FIFO order.
+        Queue<AssetRequest> pendingRequests = new ArrayDeque<>();
+
+        // Provides direct lookup of requests using their Request ID.
+        Map<Integer, AssetRequest> requestsById = new HashMap<>();
+
         int nextRequestId = 1;
 
-        ArrayList<Maintenance> maintenanceRecords = new ArrayList<>();
+
+        List<Maintenance> maintenanceRecords = new ArrayList<>();
         int nextMaintenanceId = 1;
 
-        ArrayList<SoftwareLicense> softwareLicenses = new ArrayList<>();
+        List<SoftwareLicense> softwareLicenses = new ArrayList<>();
         int nextLicenseId = 1;
 
-        ArrayList<Warranty> warranties = new ArrayList<>();
+        List<Warranty> warranties = new ArrayList<>();
         int nextWarrantyId = 1;
 
         Map<Integer, DepreciationReport> depreciationDetails = new HashMap<>();
@@ -53,6 +69,7 @@ public class AssetManagementMenu {
             System.out.println("8. View Depreciation Report");
             System.out.println("9. View All Registered Assets");
             System.out.println("10. Complete Asset Maintenance");
+            System.out.println("11. Process Pending Request");
             System.out.println("0. Exit");
             System.out.print("Enter your choice: ");
 
@@ -89,14 +106,10 @@ public class AssetManagementMenu {
                             );
                         }
 
-                        for (Asset existingAsset : assets) {
-                            if (existingAsset.getAssetTag()
-                                    .equalsIgnoreCase(assetTag)) {
-                                throw new DuplicateAssetException(
-                                        "An asset with this tag already exists: "
-                                                + assetTag
-                                );
-                            }
+                        if (assetTags.contains(assetTag.toLowerCase())) {
+                            throw new DuplicateAssetException(
+                                    "An asset with this tag already exists: " + assetTag
+                            );
                         }
 
                         Asset asset = new Asset(
@@ -108,6 +121,7 @@ public class AssetManagementMenu {
                         );
 
                         assets.add(asset);
+                        assetTags.add(assetTag.toLowerCase());
                         nextAssetId++;
 
                         System.out.println("Asset registered successfully!");
@@ -203,8 +217,12 @@ public class AssetManagementMenu {
                             "PENDING"
                     );
 
+
                     assetRequests.add(request);
+                    requestsById.put(request.getRequestId(), request);
+                    pendingRequests.offer(request);
                     nextRequestId++;
+
 
                     System.out.println("Asset request submitted successfully!");
                     System.out.println("Request ID: " + request.getRequestId());
@@ -649,6 +667,7 @@ public class AssetManagementMenu {
                             }
                             break;
                         }
+
 
                         case 0:
                             System.out.println("Returning to main menu.");
@@ -1116,6 +1135,151 @@ public class AssetManagementMenu {
                 }
 
 
+                case 11: {
+                    System.out.println("\n--- Manage Pending Requests ---");
+
+                    if (pendingRequests.isEmpty()) {
+                        System.out.println("No pending requests to process.");
+                        break;
+                    }
+
+                    // Display all requests that are still pending.
+                    System.out.println("\n--- Pending Request List ---");
+
+                    for (AssetRequest pending : pendingRequests) {
+                        if (!"PENDING".equals(pending.getStatus())) {
+                            continue;
+                        }
+
+                        Asset linkedAsset = null;
+
+                        for (Asset asset : assets) {
+                            if (asset.getAssetId() == pending.getAssetId()) {
+                                linkedAsset = asset;
+                                break;
+                            }
+                        }
+
+                        String assetName = linkedAsset == null
+                                ? "Asset not found"
+                                : linkedAsset.getAssetName();
+
+                        System.out.println(
+                                "Request ID: " + pending.getRequestId()
+                                        + " | Asset ID: " + pending.getAssetId()
+                                        + " | Asset: " + assetName
+                                        + " | Employee ID: " + pending.getEmployeeId()
+                                        + " | Date: " + pending.getRequestDate()
+                                        + " | Status: " + pending.getStatus()
+                        );
+                    }
+
+                    System.out.print("\nEnter Request ID to manage: ");
+                    String requestInput = scanner.nextLine().trim();
+
+                    int requestId;
+
+                    try {
+                        requestId = Integer.parseInt(requestInput);
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Request ID. Enter a number.");
+                        break;
+                    }
+
+                    // Find the request directly using its ID.
+                    AssetRequest request = requestsById.get(requestId);
+
+                    if (request == null) {
+                        System.out.println("Request not found.");
+                        break;
+                    }
+
+                    if (!"PENDING".equals(request.getStatus())
+                            || !pendingRequests.contains(request)) {
+                        System.out.println("This request is no longer pending.");
+                        break;
+                    }
+
+                    System.out.println("\nSelected Request ID: "
+                            + request.getRequestId());
+                    System.out.println("Asset ID: " + request.getAssetId());
+                    System.out.println("Employee ID: " + request.getEmployeeId());
+
+                    System.out.println("\n1. Approve Request");
+                    System.out.println("2. Reject Request");
+                    System.out.println("0. Cancel");
+                    System.out.print("Enter your choice: ");
+
+                    String action = scanner.nextLine().trim();
+
+                    if ("0".equals(action)) {
+                        System.out.println("Request management cancelled.");
+                        break;
+                    }
+
+                    if ("2".equals(action)) {
+                        request.setStatus("REJECTED");
+                        pendingRequests.remove(request);
+
+                        System.out.println("Request rejected successfully.");
+                        System.out.println("Request ID: " + request.getRequestId());
+                        System.out.println("Status: " + request.getStatus());
+                        break;
+                    }
+
+                    if (!"1".equals(action)) {
+                        System.out.println("Invalid choice.");
+                        break;
+                    }
+
+                    // Approval requires the requested asset to exist and be available.
+                    Asset selectedAsset = null;
+
+                    for (Asset asset : assets) {
+                        if (asset.getAssetId() == request.getAssetId()) {
+                            selectedAsset = asset;
+                            break;
+                        }
+                    }
+
+                    if (selectedAsset == null) {
+                        System.out.println("Requested asset no longer exists.");
+                        break;
+                    }
+
+                    if (!"AVAILABLE".equals(selectedAsset.getStatus())) {
+                        System.out.println("Requested asset is not available.");
+                        System.out.println("Request remains pending.");
+                        break;
+                    }
+
+                    // Create the assignment only after all checks succeed.
+                    Assignment assignment = new Assignment(
+                            nextAssignmentId,
+                            request.getAssetId(),
+                            request.getEmployeeId(),
+                            LocalDate.now(),
+                            null
+                    );
+
+                    assignments.add(assignment);
+                    nextAssignmentId++;
+
+                    selectedAsset.setStatus("ASSIGNED");
+                    request.setStatus("APPROVED");
+                    pendingRequests.remove(request);
+
+                    System.out.println("\nRequest approved successfully!");
+                    System.out.println("Request ID: " + request.getRequestId());
+                    System.out.println("Assignment ID: " + assignment.getAssignmentId());
+                    System.out.println("Asset: " + selectedAsset.getAssetName());
+                    System.out.println("Employee ID: " + request.getEmployeeId());
+                    System.out.println("Request Status: " + request.getStatus());
+
+                    break;
+                }
+
+
                 case 0:
                     System.out.println(
                             "Exiting IT Asset Management System. Goodbye!"
@@ -1124,7 +1288,7 @@ public class AssetManagementMenu {
 
                 default:
                     System.out.println(
-                            "Invalid choice! Please select an option from 0 to 9."
+                            "Invalid choice! Please select an option from 0 to 11."
                     );
             }
 
