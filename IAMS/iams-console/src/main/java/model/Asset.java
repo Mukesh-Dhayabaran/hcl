@@ -1,8 +1,8 @@
+
 package model;
 
-public class Asset {
+public class Asset extends BaseEntity {
 
-    private int assetId;
     private String assetTag;
     private String assetName;
     private String category;
@@ -10,7 +10,7 @@ public class Asset {
 
     public Asset(int assetId, String assetTag, String assetName,
                  String category, String status) {
-        this.assetId = assetId;
+        super(assetId);
         this.assetTag = assetTag;
         this.assetName = assetName;
         this.category = category;
@@ -18,7 +18,7 @@ public class Asset {
     }
 
     public int getAssetId() {
-        return assetId;
+        return getId();
     }
 
     public String getAssetTag() {

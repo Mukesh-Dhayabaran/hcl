@@ -1,20 +1,20 @@
+
 package model;
 
-public class AssetCategory {
+public class AssetCategory extends BaseEntity {
 
-    private int categoryId;
     private String categoryName;
     private String description;
 
     public AssetCategory(int categoryId, String categoryName,
                          String description) {
-        this.categoryId = categoryId;
+        super(categoryId);
         this.categoryName = categoryName;
         this.description = description;
     }
 
     public int getCategoryId() {
-        return categoryId;
+        return getId();
     }
 
     public String getCategoryName() {

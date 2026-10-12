@@ -1,10 +1,10 @@
+
 package model;
 
 import java.time.LocalDate;
 
-public class Assignment {
+public class Assignment extends BaseEntity {
 
-    private int assignmentId;
     private int assetId;
     private int employeeId;
     private LocalDate assignmentDate;
@@ -12,7 +12,7 @@ public class Assignment {
 
     public Assignment(int assignmentId, int assetId, int employeeId,
                       LocalDate assignmentDate, LocalDate returnDate) {
-        this.assignmentId = assignmentId;
+        super(assignmentId);
         this.assetId = assetId;
         this.employeeId = employeeId;
         this.assignmentDate = assignmentDate;
@@ -20,7 +20,7 @@ public class Assignment {
     }
 
     public int getAssignmentId() {
-        return assignmentId;
+        return getId();
     }
 
     public int getAssetId() {
