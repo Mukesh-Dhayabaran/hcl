@@ -1,122 +1,92 @@
-\# Day 5 – IAMS Class Diagram
+# IAMS — UML Class Diagram
 
-
-
-\## 1. Entity Inheritance
-
-
+## 1. Entity and User Inheritance
 
 ```mermaid
-
 classDiagram
+    class BaseEntity {
+        -int id
+        #BaseEntity(int id)
+        +getId() int
+    }
 
-&#x20;   class BaseEntity {
+    class Asset
+    class AssetCategory
+    class Assignment
 
-&#x20;       -int id
+    class User {
+        <<abstract>>
+        -String name
+        -String email
+        #User(int userId, String name, String email)
+        +getName() String
+        +getEmail() String
+        +getRole()* String
+        +displayPermissions()* void
+    }
 
-&#x20;       +getId() int
+    class Admin {
+        +getRole() String
+        +displayPermissions() void
+    }
 
-&#x20;   }
+    class ITAssetManager {
+        +getRole() String
+        +displayPermissions() void
+    }
 
+    class Employee {
+        +getRole() String
+        +displayPermissions() void
+    }
 
+    BaseEntity <|-- Asset
+    BaseEntity <|-- AssetCategory
+    BaseEntity <|-- Assignment
+    BaseEntity <|-- User
 
-&#x20;   class Asset
-
-&#x20;   class AssetCategory
-
-&#x20;   class Assignment
-
-
-
-&#x20;   class User {
-
-&#x20;       <<abstract>>
-
-&#x20;       -String name
-
-&#x20;       -String email
-
-&#x20;       +getName() String
-
-&#x20;       +getEmail() String
-
-&#x20;       +getRole() String
-
-&#x20;       +displayPermissions() void
-
-&#x20;   }
-
-
-
-&#x20;   BaseEntity <|-- Asset
-
-&#x20;   BaseEntity <|-- AssetCategory
-
-&#x20;   BaseEntity <|-- Assignment
-
-&#x20;   BaseEntity <|-- User
-
-
-
-&#x20;   User <|-- Admin
-
-&#x20;   User <|-- ITAssetManager
-
-&#x20;   User <|-- Employee
-
+    User <|-- Admin
+    User <|-- ITAssetManager
+    User <|-- Employee
 ```
 
-
-
-\## 2. Depreciation Strategy
-
-
+## 2. Depreciation Strategy Pattern
 
 ```mermaid
-
 classDiagram
+    class DepreciationStrategy {
+        <<interface>>
+        +calculateAnnualDepreciation(double, double, int) double
+        +calculateCurrentValue(double, double, int, int) double
+    }
 
-&#x20;   class DepreciationStrategy {
+    class StraightLineDepreciation {
+        +calculateAnnualDepreciation(double, double, int) double
+        +calculateCurrentValue(double, double, int, int) double
+    }
 
-&#x20;       <<interface>>
+    class WrittenDownValueDepreciation {
+        +calculateAnnualDepreciation(double, double, int) double
+        +calculateCurrentValue(double, double, int, int) double
+    }
 
-&#x20;       +calculateAnnualDepreciation() double
+    class DepreciationReport {
+        -DepreciationStrategy strategy
+        +getAnnualDepreciation() double
+        +getAccumulatedDepreciation() double
+        +getCurrentValue() double
+    }
 
-&#x20;       +calculateCurrentValue() double
-
-&#x20;   }
-
-
-
-&#x20;   class StraightLineDepreciation
-
-&#x20;   class WrittenDownValueDepreciation
-
-&#x20;   class DepreciationReport
-
-
-
-&#x20;   DepreciationStrategy <|.. StraightLineDepreciation
-
-&#x20;   DepreciationStrategy <|.. WrittenDownValueDepreciation
-
-&#x20;   DepreciationReport --> DepreciationStrategy : uses
-
+    DepreciationStrategy <|.. StraightLineDepreciation
+    DepreciationStrategy <|.. WrittenDownValueDepreciation
+    DepreciationReport --> DepreciationStrategy : uses
 ```
 
+## Design Concepts
 
-
-\## Key Concepts
-
-
-
-\- \*\*Inheritance:\*\* Common entity information is maintained in `BaseEntity`.
-
-\- \*\*Abstract class:\*\* `User` provides common user details and defines role-specific behavior.
-
-\- \*\*Polymorphism:\*\* `Admin`, `ITAssetManager`, and `Employee` implement role-specific behavior.
-
-\- \*\*Strategy pattern:\*\* Different depreciation algorithms implement `DepreciationStrategy`.
-
-\- \*\*Composition/reference:\*\* `DepreciationReport` uses a `DepreciationStrategy` to calculate depreciation.
-
+- **Inheritance:** `Asset`, `AssetCategory`, `Assignment`, and `User` inherit the common ID field from `BaseEntity`.
+- **Abstraction:** `User` defines common user details and abstract role-specific methods.
+- **Polymorphism:** `Admin`, `ITAssetManager`, and `Employee` provide their own implementations of `getRole()` and `displayPermissions()`.
+- **Interface:** `DepreciationStrategy` defines the operations required for depreciation calculations.
+- **Strategy pattern:** `StraightLineDepreciation` and `WrittenDownValueDepreciation` implement alternative depreciation algorithms.
+- **Dependency:** `DepreciationReport` uses a `DepreciationStrategy` to calculate depreciation.
