@@ -4,9 +4,9 @@ public abstract class Payment {
     protected double amount;
 
     public Payment(double amount) {
-        if (amount < 0) {
+        if (amount <= 0) {
             throw new IllegalArgumentException(
-                    "Amount cannot be negative"
+                    "Payment amount must be positive"
             );
         }
         this.amount = amount;
