@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.Comparator;
 import java.time.LocalDate;
 import model.Asset;
 import model.Assignment;
@@ -25,11 +26,14 @@ public class AssetManagementMenu {
         Scanner scanner = new Scanner(System.in);
         List<Asset> assets = new ArrayList<>();
 
+        Map<Integer, Asset> assetsById = new HashMap<>();
+
         Set<String> assetTags = new HashSet<>();
 
         int nextAssetId = 1;
 
         List<Assignment> assignments = new ArrayList<>();
+        Map<Integer, Assignment> activeAssignmentsByAssetId = new HashMap<>();
         int nextAssignmentId = 1;
 
 
@@ -45,9 +49,11 @@ public class AssetManagementMenu {
 
 
         List<Maintenance> maintenanceRecords = new ArrayList<>();
+        Map<Integer, Maintenance> maintenanceById = new HashMap<>();
         int nextMaintenanceId = 1;
 
         List<SoftwareLicense> softwareLicenses = new ArrayList<>();
+        Map<Integer, SoftwareLicense> licensesById = new HashMap<>();
         int nextLicenseId = 1;
 
         List<Warranty> warranties = new ArrayList<>();
@@ -121,6 +127,7 @@ public class AssetManagementMenu {
                         );
 
                         assets.add(asset);
+                        assetsById.put(asset.getAssetId(), asset);
                         assetTags.add(assetTag.toLowerCase());
                         nextAssetId++;
 
@@ -173,14 +180,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Asset requestedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == requestedAssetId) {
-                            requestedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset requestedAsset = assetsById.get(requestedAssetId);
 
                     if (requestedAsset == null) {
                         System.out.println("Asset not found.");
@@ -258,21 +258,15 @@ public class AssetManagementMenu {
                             break;
                         }
 
-                        Asset selectedAsset = null;
-
-                        for (Asset asset : assets) {
-                            if (asset.getAssetId() == assetId) {
-                                selectedAsset = asset;
-                                break;
-                            }
-                        }
+                        Asset selectedAsset = assetsById.get(assetId);
 
                         if (selectedAsset == null) {
                             System.out.println("Asset not found.");
                             break;
                         }
 
-                        if (selectedAsset.getStatus().equals("ASSIGNED")) {
+                        if (activeAssignmentsByAssetId.containsKey(assetId)
+                                || "ASSIGNED".equals(selectedAsset.getStatus())) {
                             System.out.println("Asset is not available for assignment.");
                             break;
                         }
@@ -308,6 +302,7 @@ public class AssetManagementMenu {
                         );
 
                         assignments.add(assignment);
+                        activeAssignmentsByAssetId.put(assetId, assignment);
                         nextAssignmentId++;
                         selectedAsset.setStatus("ASSIGNED");
 
@@ -330,29 +325,14 @@ public class AssetManagementMenu {
                             break;
                         }
 
-                        Asset selectedAsset = null;
-
-                        for (Asset asset : assets) {
-                            if (asset.getAssetId() == assetId) {
-                                selectedAsset = asset;
-                                break;
-                            }
-                        }
+                        Asset selectedAsset = assetsById.get(assetId);
 
                         if (selectedAsset == null) {
                             System.out.println("Asset not found.");
                             break;
                         }
 
-                        Assignment activeAssignment = null;
-
-                        for (Assignment assignment : assignments) {
-                            if (assignment.getAssetId() == assetId
-                                    && assignment.getReturnDate() == null) {
-                                activeAssignment = assignment;
-                                break;
-                            }
-                        }
+                        Assignment activeAssignment = activeAssignmentsByAssetId.get(assetId);
 
                         if (activeAssignment == null) {
                             System.out.println("This asset has no active assignment.");
@@ -360,6 +340,7 @@ public class AssetManagementMenu {
                         }
 
                         activeAssignment.setReturnDate(LocalDate.now());
+                        activeAssignmentsByAssetId.remove(assetId);
                         selectedAsset.setStatus("AVAILABLE");
 
                         System.out.println("Asset returned successfully!");
@@ -393,14 +374,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Asset selectedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == assetId) {
-                            selectedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset selectedAsset = assetsById.get(assetId);
 
                     if (selectedAsset == null) {
                         System.out.println("Asset not found.");
@@ -414,15 +388,7 @@ public class AssetManagementMenu {
                     System.out.println("Category: " + selectedAsset.getCategory());
                     System.out.println("Current Status: " + selectedAsset.getStatus());
 
-                    Assignment activeAssignment = null;
-
-                    for (Assignment assignment : assignments) {
-                        if (assignment.getAssetId() == assetId
-                                && assignment.getReturnDate() == null) {
-                            activeAssignment = assignment;
-                            break;
-                        }
-                    }
+                    Assignment activeAssignment = activeAssignmentsByAssetId.get(assetId);
 
                     if (activeAssignment != null) {
                         System.out.println("\n--- Current Assignment ---");
@@ -460,14 +426,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Asset selectedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == assetId) {
-                            selectedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset selectedAsset = assetsById.get(assetId);
 
                     if (selectedAsset == null) {
                         System.out.println("Asset not found.");
@@ -508,6 +467,7 @@ public class AssetManagementMenu {
                     );
 
                     maintenanceRecords.add(maintenance);
+                    maintenanceById.put(maintenance.getMaintenanceId(), maintenance);
                     nextMaintenanceId++;
 
                     selectedAsset.setStatus("MAINTENANCE");
@@ -584,6 +544,7 @@ public class AssetManagementMenu {
                             );
 
                             softwareLicenses.add(license);
+                            licensesById.put(license.getLicenseId(), license);
                             System.out.println("Software licence added successfully.");
                             System.out.println("Licence ID: " + nextLicenseId);
                             nextLicenseId++;
@@ -640,14 +601,7 @@ public class AssetManagementMenu {
                                 break;
                             }
 
-                            SoftwareLicense selectedLicense = null;
-
-                            for (SoftwareLicense license : softwareLicenses) {
-                                if (license.getLicenseId() == licenseId) {
-                                    selectedLicense = license;
-                                    break;
-                                }
-                            }
+                            SoftwareLicense selectedLicense = licensesById.get(licenseId);
 
                             if (selectedLicense == null) {
                                 System.out.println("Software licence not found.");
@@ -727,14 +681,7 @@ public class AssetManagementMenu {
                                 break;
                             }
 
-                            Asset selectedAsset = null;
-
-                            for (Asset asset : assets) {
-                                if (asset.getAssetId() == assetId) {
-                                    selectedAsset = asset;
-                                    break;
-                                }
-                            }
+                            Asset selectedAsset = assetsById.get(assetId);
 
                             if (selectedAsset == null) {
                                 System.out.println("Asset not found.");
@@ -794,14 +741,8 @@ public class AssetManagementMenu {
                             System.out.println("\n--- Warranty Expiry Report ---");
 
                             for (Warranty warranty : warranties) {
-                                Asset linkedAsset = null;
 
-                                for (Asset asset : assets) {
-                                    if (asset.getAssetId() == warranty.getAssetId()) {
-                                        linkedAsset = asset;
-                                        break;
-                                    }
-                                }
+                                Asset linkedAsset = assetsById.get(warranty.getAssetId());
 
                                 if (linkedAsset == null) {
                                     continue;
@@ -875,14 +816,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Asset selectedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == assetId) {
-                            selectedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset selectedAsset = assetsById.get(assetId);
 
                     if (selectedAsset == null) {
                         System.out.println("Asset not found.");
@@ -1009,14 +943,54 @@ public class AssetManagementMenu {
                 }
 
 
-
-                case 9:
+                case 9: {
                     System.out.println("\n--- Registered Assets ---");
 
                     if (assets.isEmpty()) {
                         System.out.println("No assets have been registered yet.");
-                    } else {
-                        for (Asset asset : assets) {
+                        break;
+                    }
+
+                    System.out.println("\nSort assets by:");
+                    System.out.println("1. Asset ID");
+                    System.out.println("2. Asset Name");
+                    System.out.print("Enter your choice: ");
+
+                    int sortChoice;
+                    try {
+                        sortChoice = Integer.parseInt(scanner.nextLine().trim());
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid sorting choice. Enter 1 or 2.");
+                        break;
+                    }
+
+                    List<Asset> sortedAssets = new ArrayList<>(assets);
+
+                    Comparator<Asset> sortById =
+                            Comparator.comparingInt(Asset::getAssetId);
+
+                    Comparator<Asset> sortByName =
+                            Comparator.comparing(
+                                    Asset::getAssetName,
+                                    String.CASE_INSENSITIVE_ORDER
+                            ).thenComparing(sortById);
+
+                    switch (sortChoice) {
+                        case 1:
+                            sortedAssets.sort(sortById);
+                            break;
+
+                        case 2:
+                            sortedAssets.sort(sortByName);
+                            break;
+
+                        default:
+                            System.out.println("Invalid sorting choice.");
+                            break;
+                    }
+
+                    if (sortChoice == 1 || sortChoice == 2) {
+                        for (Asset asset : sortedAssets) {
                             System.out.println("-------------------------");
                             System.out.println("Asset ID: " + asset.getAssetId());
                             System.out.println("Asset Tag: " + asset.getAssetTag());
@@ -1024,9 +998,13 @@ public class AssetManagementMenu {
                             System.out.println("Category: " + asset.getCategory());
                             System.out.println("Status: " + asset.getStatus());
                         }
+
                         System.out.println("-------------------------");
                     }
+
                     break;
+                }
+
 
 
                 case 10: {
@@ -1036,14 +1014,7 @@ public class AssetManagementMenu {
 
                     for (Maintenance record : maintenanceRecords) {
                         if ("IN_PROGRESS".equals(record.getStatus())) {
-                            Asset asset = null;
-
-                            for (Asset item : assets) {
-                                if (item.getAssetId() == record.getAssetId()) {
-                                    asset = item;
-                                    break;
-                                }
-                            }
+                            Asset asset = assetsById.get(record.getAssetId());
 
                             if (asset != null) {
                                 System.out.println(
@@ -1081,15 +1052,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Maintenance selectedRecord = null;
-
-                    for (Maintenance record : maintenanceRecords) {
-
-                        if (record.getMaintenanceId() == maintenanceId) {
-                            selectedRecord = record;
-                            break;
-                        }
-                    }
+                    Maintenance selectedRecord = maintenanceById.get(maintenanceId);
 
                     if (selectedRecord == null) {
                         System.out.println("Maintenance record not found.");
@@ -1101,14 +1064,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
-                    Asset selectedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == selectedRecord.getAssetId()) {
-                            selectedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset selectedAsset = assetsById.get(selectedRecord.getAssetId());
 
                     if (selectedAsset == null) {
                         System.out.println("Associated asset not found.");
@@ -1151,14 +1107,7 @@ public class AssetManagementMenu {
                             continue;
                         }
 
-                        Asset linkedAsset = null;
-
-                        for (Asset asset : assets) {
-                            if (asset.getAssetId() == pending.getAssetId()) {
-                                linkedAsset = asset;
-                                break;
-                            }
-                        }
+                        Asset linkedAsset = assetsById.get(pending.getAssetId());
 
                         String assetName = linkedAsset == null
                                 ? "Asset not found"
@@ -1233,14 +1182,7 @@ public class AssetManagementMenu {
                     }
 
                     // Approval requires the requested asset to exist and be available.
-                    Asset selectedAsset = null;
-
-                    for (Asset asset : assets) {
-                        if (asset.getAssetId() == request.getAssetId()) {
-                            selectedAsset = asset;
-                            break;
-                        }
-                    }
+                    Asset selectedAsset = assetsById.get(request.getAssetId());
 
                     if (selectedAsset == null) {
                         System.out.println("Requested asset no longer exists.");
@@ -1263,6 +1205,7 @@ public class AssetManagementMenu {
                     );
 
                     assignments.add(assignment);
+                    activeAssignmentsByAssetId.put(request.getAssetId(), assignment);
                     nextAssignmentId++;
 
                     selectedAsset.setStatus("ASSIGNED");
