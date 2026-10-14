@@ -90,7 +90,6 @@ public class AssetManagementMenu {
 
             switch (choice) {
 
-
                 case 1: {
                     System.out.println("\n--- Register an Asset ---");
 
