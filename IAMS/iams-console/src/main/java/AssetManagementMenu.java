@@ -16,21 +16,62 @@ import model.Maintenance;
 import model.SoftwareLicense;
 import model.Warranty;
 import model.DepreciationReport;
+import repository.CrudRepository;
+import repository.InMemoryRepository;
 import exception.ValidationException;
 import exception.DuplicateAssetException;
+import java.io.IOException;
 
 public class AssetManagementMenu {
 
     public static void main(String[] args) {
 
         Scanner scanner = new Scanner(System.in);
-        List<Asset> assets = new ArrayList<>();
+
+        CrudRepository<Asset, Integer> assetRepository =
+                new InMemoryRepository<>(Asset::getId);
+
+        try {
+            new AssetCsvLoader().load(assetRepository);
+        } catch (IOException e) {
+            System.out.println("Failed to load seed assets: " + e.getMessage());
+            scanner.close();
+            return;
+        }
+
+        List<Asset> assets = new ArrayList<>(assetRepository.findAll());
 
         Map<Integer, Asset> assetsById = new HashMap<>();
-
         Set<String> assetTags = new HashSet<>();
 
         int nextAssetId = 1;
+
+        for (Asset asset : assets) {
+            assetsById.put(asset.getId(), asset);
+            assetTags.add(asset.getAssetTag().toLowerCase());
+
+            nextAssetId = Math.max(nextAssetId, asset.getId() + 1);
+        }
+
+
+        CrudRepository<Assignment, Integer> assignmentRepository =
+                new InMemoryRepository<>(Assignment::getId);
+
+        CrudRepository<AssetRequest, Integer> requestRepository =
+                new InMemoryRepository<>(AssetRequest::getRequestId);
+
+        CrudRepository<Maintenance, Integer> maintenanceRepository =
+                new InMemoryRepository<>(Maintenance::getMaintenanceId);
+
+        CrudRepository<SoftwareLicense, Integer> licenseRepository =
+                new InMemoryRepository<>(SoftwareLicense::getLicenseId);
+
+        CrudRepository<Warranty, Integer> warrantyRepository =
+                new InMemoryRepository<>(Warranty::getWarrantyId);
+
+        CrudRepository<DepreciationReport, Integer> depreciationRepository =
+                new InMemoryRepository<>(DepreciationReport::getAssetId);
+
 
         List<Assignment> assignments = new ArrayList<>();
         Map<Integer, Assignment> activeAssignmentsByAssetId = new HashMap<>();
@@ -125,8 +166,9 @@ public class AssetManagementMenu {
                                 "AVAILABLE"
                         );
 
+                        assetRepository.save(asset);
                         assets.add(asset);
-                        assetsById.put(asset.getAssetId(), asset);
+                        assetsById.put(asset.getId(), asset);
                         assetTags.add(assetTag.toLowerCase());
                         nextAssetId++;
 
@@ -208,6 +250,7 @@ public class AssetManagementMenu {
                         break;
                     }
 
+
                     AssetRequest request = new AssetRequest(
                             nextRequestId,
                             requestedAssetId,
@@ -216,11 +259,12 @@ public class AssetManagementMenu {
                             "PENDING"
                     );
 
-
+                    requestRepository.save(request);
                     assetRequests.add(request);
                     requestsById.put(request.getRequestId(), request);
                     pendingRequests.offer(request);
                     nextRequestId++;
+
 
 
                     System.out.println("Asset request submitted successfully!");
@@ -292,6 +336,7 @@ public class AssetManagementMenu {
                             break;
                         }
 
+
                         Assignment assignment = new Assignment(
                                 nextAssignmentId,
                                 assetId,
@@ -300,10 +345,12 @@ public class AssetManagementMenu {
                                 null
                         );
 
+                        assignmentRepository.save(assignment);
                         assignments.add(assignment);
                         activeAssignmentsByAssetId.put(assetId, assignment);
                         nextAssignmentId++;
                         selectedAsset.setStatus("ASSIGNED");
+
 
                         System.out.println("Asset assigned successfully!");
                         System.out.println("Assignment ID: " + assignment.getAssignmentId());
@@ -457,6 +504,8 @@ public class AssetManagementMenu {
                         break;
                     }
 
+
+
                     Maintenance maintenance = new Maintenance(
                             nextMaintenanceId,
                             assetId,
@@ -465,11 +514,13 @@ public class AssetManagementMenu {
                             "IN_PROGRESS"
                     );
 
+                    maintenanceRepository.save(maintenance);
                     maintenanceRecords.add(maintenance);
                     maintenanceById.put(maintenance.getMaintenanceId(), maintenance);
                     nextMaintenanceId++;
-
                     selectedAsset.setStatus("MAINTENANCE");
+
+
 
                     System.out.println("Maintenance recorded successfully!");
                     System.out.println(
@@ -538,12 +589,17 @@ public class AssetManagementMenu {
                                 break;
                             }
 
+
                             SoftwareLicense license = new SoftwareLicense(
-                                    nextLicenseId, softwareName, purchasedSeats
+                                    nextLicenseId,
+                                    softwareName,
+                                    purchasedSeats
                             );
 
+                            licenseRepository.save(license);
                             softwareLicenses.add(license);
                             licensesById.put(license.getLicenseId(), license);
+
                             System.out.println("Software licence added successfully.");
                             System.out.println("Licence ID: " + nextLicenseId);
                             nextLicenseId++;
@@ -717,11 +773,16 @@ public class AssetManagementMenu {
                                 break;
                             }
 
+
                             Warranty warranty = new Warranty(
-                                    nextWarrantyId, assetId, expiryDate
+                                    nextWarrantyId,
+                                    assetId,
+                                    expiryDate
                             );
 
+                            warrantyRepository.save(warranty);
                             warranties.add(warranty);
+
 
                             System.out.println("Warranty registered successfully.");
                             System.out.println("Warranty ID: " + nextWarrantyId);
@@ -894,6 +955,7 @@ public class AssetManagementMenu {
                             break;
                         }
 
+
                         report = new DepreciationReport(
                                 assetId,
                                 purchaseCost,
@@ -902,7 +964,9 @@ public class AssetManagementMenu {
                                 elapsedYears
                         );
 
+                        depreciationRepository.save(report);
                         depreciationDetails.put(assetId, report);
+
                     }
 
                     System.out.println("\n===== DEPRECIATION REPORT =====");
@@ -1195,6 +1259,7 @@ public class AssetManagementMenu {
                     }
 
                     // Create the assignment only after all checks succeed.
+
                     Assignment assignment = new Assignment(
                             nextAssignmentId,
                             request.getAssetId(),
@@ -1203,13 +1268,14 @@ public class AssetManagementMenu {
                             null
                     );
 
+                    assignmentRepository.save(assignment);
                     assignments.add(assignment);
                     activeAssignmentsByAssetId.put(request.getAssetId(), assignment);
                     nextAssignmentId++;
-
                     selectedAsset.setStatus("ASSIGNED");
                     request.setStatus("APPROVED");
                     pendingRequests.remove(request);
+
 
                     System.out.println("\nRequest approved successfully!");
                     System.out.println("Request ID: " + request.getRequestId());

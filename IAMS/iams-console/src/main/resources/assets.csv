@@ -1,0 +1,6 @@
+id,assetTag,assetName,category,status
+1,AST-001,Dell Laptop,Laptop,Available
+2,AST-002,HP Monitor,Monitor,Available
+3,AST-003,Logitech Keyboard,Peripheral,Available
+4,AST-004,Lenovo ThinkPad,Laptop,Assigned
+5,AST-005,Canon Printer,Printer,Available
