@@ -187,6 +187,7 @@ public class AssetManagementMenu {
                 }
 
 
+
                 case 2: {
                     System.out.println("\n--- Request an Asset ---");
 
@@ -250,7 +251,6 @@ public class AssetManagementMenu {
                         break;
                     }
 
-
                     AssetRequest request = new AssetRequest(
                             nextRequestId,
                             requestedAssetId,
@@ -265,8 +265,6 @@ public class AssetManagementMenu {
                     pendingRequests.offer(request);
                     nextRequestId++;
 
-
-
                     System.out.println("Asset request submitted successfully!");
                     System.out.println("Request ID: " + request.getRequestId());
                     System.out.println("Asset: " + requestedAsset.getAssetName());
@@ -276,6 +274,7 @@ public class AssetManagementMenu {
 
                     break;
                 }
+
 
 
 
@@ -405,55 +404,182 @@ public class AssetManagementMenu {
 
 
 
+
                 case 4: {
                     System.out.println("\n--- Check Asset Assignment ---");
+                    System.out.println("1. Search by Asset ID");
+                    System.out.println("2. Search by Employee ID");
+                    System.out.println("3. Display All");
+                    System.out.println("0. Back to Main Menu");
+                    System.out.print("Enter your choice: ");
 
-                    System.out.print("Enter Asset ID: ");
-                    String assetIdInput = scanner.nextLine().trim();
+                    String searchChoice = scanner.nextLine().trim();
 
-                    int assetId;
+                    int option;
 
                     try {
-                        assetId = Integer.parseInt(assetIdInput);
+                        option = Integer.parseInt(searchChoice);
                     } catch (NumberFormatException e) {
-                        System.out.println("Invalid Asset ID. Enter a number.");
+                        System.out.println("Invalid choice. Enter a number.");
                         break;
                     }
 
-                    Asset selectedAsset = assetsById.get(assetId);
+                    switch (option) {
 
-                    if (selectedAsset == null) {
-                        System.out.println("Asset not found.");
-                        break;
-                    }
+                        case 1: {
+                            System.out.print("Enter Asset ID: ");
+                            String employeeIdInput  = scanner.nextLine().trim();
 
-                    System.out.println("\n--- Asset Details ---");
-                    System.out.println("Asset ID: " + selectedAsset.getAssetId());
-                    System.out.println("Asset Tag: " + selectedAsset.getAssetTag());
-                    System.out.println("Asset Name: " + selectedAsset.getAssetName());
-                    System.out.println("Category: " + selectedAsset.getCategory());
-                    System.out.println("Current Status: " + selectedAsset.getStatus());
+                            int assetId;
 
-                    Assignment activeAssignment = activeAssignmentsByAssetId.get(assetId);
+                            try {
+                                assetId = Integer.parseInt(employeeIdInput);
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid Asset ID. Enter a number.");
+                                break;
+                            }
 
-                    if (activeAssignment != null) {
-                        System.out.println("\n--- Current Assignment ---");
-                        System.out.println(
-                                "Assignment ID: " + activeAssignment.getAssignmentId()
-                        );
-                        System.out.println(
-                                "Employee ID: " + activeAssignment.getEmployeeId()
-                        );
-                        System.out.println(
-                                "Assignment Date: " + activeAssignment.getAssignmentDate()
-                        );
-                        System.out.println("Assignment Status: ACTIVE");
-                    } else {
-                        System.out.println("\nNo active assignment found for this asset.");
+                            if (assetId <= 0) {
+                                System.out.println("Asset ID must be greater than zero.");
+                                break;
+                            }
+
+                            Asset asset = assetsById.get(assetId);
+
+                            if (asset == null) {
+                                System.out.println("Asset not found.");
+                                break;
+                            }
+
+                            Assignment assignment =
+                                    activeAssignmentsByAssetId.get(assetId);
+
+                            System.out.println("\n--- Asset Details ---");
+                            System.out.println("Asset ID: " + asset.getAssetId());
+                            System.out.println("Asset Tag: " + asset.getAssetTag());
+                            System.out.println("Asset Name: " + asset.getAssetName());
+                            System.out.println("Category: " + asset.getCategory());
+                            System.out.println("Current Status: " + asset.getStatus());
+
+                            if (assignment == null) {
+                                System.out.println("\nNo active assignment found for this asset.");
+                            } else {
+                                System.out.println("\n--- Current Assignment ---");
+                                System.out.println("Assignment ID: "
+                                        + assignment.getAssignmentId());
+                                System.out.println("Employee ID: "
+                                        + assignment.getEmployeeId());
+                                System.out.println("Assignment Date: "
+                                        + assignment.getAssignmentDate());
+                                System.out.println("Assignment Status: ACTIVE");
+                            }
+
+                            break;
+                        }
+
+                        case 2: {
+                            System.out.print("Enter Employee ID: ");
+                            String assetIdInput  = scanner.nextLine().trim();
+
+                            int employeeId;
+
+                            try {
+                                employeeId = Integer.parseInt(assetIdInput );
+                            } catch (NumberFormatException e) {
+                                System.out.println("Invalid Employee ID. Enter a number.");
+                                break;
+                            }
+
+                            if (employeeId <= 0) {
+                                System.out.println("Employee ID must be greater than zero.");
+                                break;
+                            }
+
+                            boolean found = false;
+
+                            System.out.println("\n--- Employee Assignment Details ---");
+                            System.out.println("Employee ID: " + employeeId);
+
+                            for (Assignment assignment :
+                                    activeAssignmentsByAssetId.values()) {
+
+                                if (assignment.getEmployeeId() == employeeId) {
+
+                                    Asset asset = assetsById.get(assignment.getAssetId());
+
+                                    if (asset == null) {
+                                        continue;
+                                    }
+
+                                    System.out.println("\n-----------------------------");
+                                    System.out.println("Assignment ID: "
+                                            + assignment.getAssignmentId());
+                                    System.out.println("Asset ID: " + asset.getAssetId());
+                                    System.out.println("Asset Tag: " + asset.getAssetTag());
+                                    System.out.println("Asset Name: " + asset.getAssetName());
+                                    System.out.println("Category: " + asset.getCategory());
+                                    System.out.println("Assignment Date: "
+                                            + assignment.getAssignmentDate());
+                                    System.out.println("Assignment Status: ACTIVE");
+
+                                    found = true;
+                                }
+                            }
+
+                            if (!found) {
+                                System.out.println(
+                                        "No active asset assignments found for this employee."
+                                );
+                            }
+
+                            break;
+                        }
+
+                        case 3: {
+                            if (activeAssignmentsByAssetId.isEmpty()) {
+                                System.out.println("No active asset assignments found.");
+                                break;
+                            }
+
+                            System.out.println("\n--- All Active Asset Assignments ---");
+
+                            for (Assignment assignment :
+                                    activeAssignmentsByAssetId.values()) {
+
+                                Asset asset = assetsById.get(assignment.getAssetId());
+
+                                if (asset == null) {
+                                    continue;
+                                }
+
+                                System.out.println("\n-----------------------------");
+                                System.out.println("Assignment ID: "
+                                        + assignment.getAssignmentId());
+                                System.out.println("Asset ID: " + asset.getAssetId());
+                                System.out.println("Asset Tag: " + asset.getAssetTag());
+                                System.out.println("Asset Name: " + asset.getAssetName());
+                                System.out.println("Category: " + asset.getCategory());
+                                System.out.println("Employee ID: "
+                                        + assignment.getEmployeeId());
+                                System.out.println("Assignment Date: "
+                                        + assignment.getAssignmentDate());
+                                System.out.println("Assignment Status: ACTIVE");
+                            }
+
+                            break;
+                        }
+
+                        case 0:
+                            System.out.println("Returning to main menu.");
+                            break;
+
+                        default:
+                            System.out.println("Invalid choice. Select 0, 1, 2, or 3.");
                     }
 
                     break;
                 }
+
 
 
 
